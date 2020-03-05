@@ -8,11 +8,16 @@
 #include <cstring>
 #include <iomanip>
 #include <fstream>
+#include <cmath>
 
 using namespace std;
 
 //functions
 void parse(char* in, int* modif, int &count);
+void buildHeap(int* modif, int* heap, int size);
+int getMax(int* array);
+void printHeap(int* heap, int size);
+void deleteHeap(int* heap, int size);
 
 int main() {
   //variables
@@ -29,6 +34,10 @@ int main() {
   cout << "Welcome to my Heap program." << endl;
   bool run = true;
   while (run) {
+    for (int c = 0; c < 100; c++) {
+      modif[c] = 0; //clear array
+    }
+    count = 0;  //clear array size index
     cout << endl << "You can: heap, quit." << endl;
     cin.get(inp, 10);
     cin.clear();
@@ -40,7 +49,7 @@ int main() {
       cin.clear();
       cin.ignore(10000, '\n');
       if (strcmp(inp, "file") == 0) {
-	//Thank you Omar Nassar for this chunk of code
+	//Credit Omar Nassar for this chunk of code
 	cout << endl << "What is the name of the file?" << endl << ">> ";
 	cin.get(fileName, 30);
 	cin.clear();
@@ -52,9 +61,10 @@ int main() {
 	  file.seekg(0, ios::beg);
 	  file.read(input, size);
 	  file.close();
-	  parse(input, modif, count);
+	  parse(input, modif, count);  //parse input to modif array
 	  cout << "IN: ";
 	  for (int i = 0; i < 100; i++) {
+	    if (modif[i] == 0) break;
 	    cout << modif[i] << " ";
 	  }
 	  cout << endl;
@@ -67,9 +77,10 @@ int main() {
 	cin.clear();
 	cin.ignore(1000000, '\n');
 	//parse input by spaces
-	parse(in, modif, count);
-	cout << "IN: ";
+	parse(in, modif, count);  //parse input to modif array
+	cout << ">> IN: ";
 	for (int i = 0; i < 100; i++) {
+	  if (modif[i] == 0) break;
 	  cout << modif[i] << " ";
 	}
 	cout << endl;      
@@ -77,9 +88,28 @@ int main() {
       else {
 	cout << "Invalid input type. Try again." << endl;
       }
-    //create heap tree
-    char** heap = new char*[count+1];  //it's a linear tree yoooo
-
+      //create heap tree
+      int heap[101];  //it's a linear tree yoooo
+      for (int c = 0; c < 101; c++) {
+	heap[c] = 0;  //clear array
+      }
+      //get size of modif array
+      int siz = 0;
+      for (int i = 0; i < 100; i++) {
+	if(modif[i] != 0) {
+	  siz++;
+	} else break;
+      }
+      buildHeap(modif, heap, siz);
+      cout << "=======Heap=Built=======" << endl;
+      for (int i = 1; i < 101; i++) {
+	if (heap[i] == 0) break;
+	cout << heap[i] << " ";
+      }
+      cout << endl;
+      printHeap(heap, siz);
+      cout << "=====Heap=Deletion======" << endl;
+      deleteHeap(heap, siz);
     }
     else if (strcmp(inp, "quit") == 0) {
       cout << endl << "Thank you for using my program!" << endl;
@@ -124,4 +154,59 @@ void parse(char* in, int* modif, int &count) {
       }
     }
   } 
+}
+
+void buildHeap(int* modif, int* heap, int size) {
+  int curr = 1;
+  //set index at 1 to largest int
+  heap[1] = modif[getMax(modif)];  //largest set at index 1
+  modif[getMax(modif)] = 0;
+  while(curr <= size) {
+    //check if out of nums
+    if(heap[2*curr] == 0) {  //if right child is empty
+      //fill right child with next max int
+      heap[2*curr] = modif[getMax(modif)];
+      modif[getMax(modif)] = 0;
+      //now fill left chile with next
+      heap[2*curr+1] = modif[getMax(modif)];
+      modif[getMax(modif)] = 0;
+    } else {  //if right child filled
+      //fill left child with next max int
+      heap[2*curr+1] = modif[getMax(modif)];
+      modif[getMax(modif)] = 0;
+    }
+    curr++;
+  }
+}
+
+int getMax(int* array) {
+  int i;
+  for (int l = 0; l < 100; l++) {
+    if (array[l] >= array[i]) {
+      i = l;
+    }
+  }
+  return i;
+}
+
+void printHeap(int* heap, int size) {
+  for(int i = 1; i <= size/2; i++) {
+    if(heap[i] != 0) {
+      cout << endl << heap[i];
+    }
+    if (heap[i*2] != 0) {
+      cout << "---R:" << heap[i*2];
+    }
+    if(heap[i*2+1] != 0) {
+      cout << " & L:" << heap[i*2+1] << endl;
+    }
+  }
+}
+
+void deleteHeap(int* heap, int size) {
+  for (int i = 1; i <= size; i++) {
+    cout << heap[i] << " ";
+    heap[i] = 0;
+  }
+  cout << endl;
 }
